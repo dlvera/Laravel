@@ -2,16 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use DataTables;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        if ($request->ajax()) {
+            $data = User::with('city')->select('*');
+            
+            return DataTables::of($data)
+                ->addIndexColumn()
+                ->addColumn('age', function($row){
+                    return $row->age;
+                })
+                ->addColumn('action', function($row){
+                    $btn = '<a href="'.route('users.edit', $row->id).'" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded text-xs">Editar</a>';
+                    $btn .= '<form action="'.route('users.destroy', $row->id).'" method="POST" class="inline-block">';
+                    $btn .= csrf_field();
+                    $btn .= method_field('DELETE');
+                    $btn .= '<button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 rounded text-xs ml-2">Eliminar</button>';
+                    $btn .= '</form>';
+                    return $btn;
+                })
+                ->rawColumns(['action'])
+                ->make(true);
+        }
+        
+        return view('users.index');
     }
 
     /**
