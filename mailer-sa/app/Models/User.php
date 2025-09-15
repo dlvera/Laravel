@@ -21,6 +21,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'identifier',
+        'phone',
+        'document',
+        'birthdate',
+        'city_id',
+        'is_admin'
     ];
 
     /**
@@ -33,16 +39,24 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'birthdate' => 'date',
+    ];
+
+    public function city()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(City::class);
+    }
+
+    public function emails()
+    {
+        return $this->hasMany(Email::class);
+    }
+
+    // Accesor para la edad
+    public function getAgeAttribute()
+    {
+        return now()->diffInYears($this->birthdate);
     }
 }
