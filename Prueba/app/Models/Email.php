@@ -64,4 +64,9 @@ class Email extends Model
             'sent_at' => now(),
         ]);
     }
+
+    protected static function newFactory()
+{
+    return \Database\Factories\EmailFactory::new();
+}
 }
