@@ -16,6 +16,11 @@ Route::middleware('auth')->group(function () {
         return view('dashboard');
     })->name('dashboard');
 
+    // Perfil de usuario
+    Route::get('/profile', function () {
+        return view('profile');
+    })->name('profile');
+
     // Gestión de emails
     Route::resource('emails', EmailController::class)->except(['edit', 'update']);
     Route::get('emails/{email}/download/{attachment}', [EmailController::class, 'downloadAttachment'])
