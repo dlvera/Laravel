@@ -8,12 +8,17 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable; // Removió HasApiTokens
+    use HasFactory, Notifiable;
 
     protected $fillable = [
+        'identifier',
         'name',
         'email',
         'password',
+        'phone',
+        'cedula',
+        'birth_date',
+        'city_id',
         'is_active',
     ];
 
@@ -25,19 +30,19 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
+        'birth_date' => 'date',
     ];
 
-    /**
-     * Relación: Un usuario puede tener muchos emails enviados
-     */
     public function sentEmails()
     {
         return $this->hasMany(Email::class);
     }
 
-    /**
-     * Scope para usuarios activos
-     */
+    public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
