@@ -30,3 +30,16 @@ Route::middleware('auth')->group(function () {
 Route::get('/', function () {
     return view('home');
 })->name('home');
+
+// Rutas de administración
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+    // Dashboard de administración
+    Route::get('/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('dashboard');
+    
+    // Gestión de usuarios
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    Route::get('users/states', [\App\Http\Controllers\Admin\UserController::class, 'getStates'])->name('users.states');
+    Route::get('users/cities', [\App\Http\Controllers\Admin\UserController::class, 'getCities'])->name('users.cities');
+});
