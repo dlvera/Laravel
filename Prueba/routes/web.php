@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\EmailController;
+use App\Http\Controllers\EmailController;;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas de autenticación
@@ -27,10 +28,6 @@ Route::middleware('auth')->group(function () {
         ->name('emails.attachment.download');
 });
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
-
 // Rutas de administración
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     // Dashboard de administración
@@ -39,7 +36,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     })->name('dashboard');
     
     // Gestión de usuarios
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-    Route::get('users/states', [\App\Http\Controllers\Admin\UserController::class, 'getStates'])->name('users.states');
-    Route::get('users/cities', [\App\Http\Controllers\Admin\UserController::class, 'getCities'])->name('users.cities');
+    Route::resource('users', AdminUserController::class);
+    Route::get('users/states', [AdminUserController::class, 'getStates'])->name('users.states');
+    Route::get('users/cities', [AdminUserController::class, 'getCities'])->name('users.cities');
 });

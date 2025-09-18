@@ -13,7 +13,10 @@ return new class extends Migration
             $table->string('phone', 15)->nullable()->after('email');
             $table->string('cedula', 11)->after('phone');
             $table->date('birth_date')->after('cedula');
-            $table->foreignId('city_id')->nullable()->after('birth_date')->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('city_id')->nullable()->after('birth_date');
+            
+            // Clave foránea
+            $table->foreign('city_id')->references('id')->on('cities')->onDelete('set null');
         });
     }
 

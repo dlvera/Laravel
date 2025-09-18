@@ -16,8 +16,9 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_active')->default(true);
             $table->rememberToken();
+            // $table->foreignId('city_id')->constrained()->onDelete('cascade');
             $table->timestamps();
-        });
+              });
     }
 
     public function down()

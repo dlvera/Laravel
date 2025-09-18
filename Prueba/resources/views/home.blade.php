@@ -10,9 +10,6 @@
             <div class="bg-white overflow-hidden shadow-xl rounded-lg">
                 <div class="p-6">
                     <h2 class="text-2xl font-semibold text-gray-900">Welcome to {{ config('app.name') }}</h2>
-                    <p class="mt-4 text-gray-600">
-                        This is your dashboard. You're logged in!
-                    </p>
                 </div>
             </div>
         </div>

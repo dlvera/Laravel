@@ -47,4 +47,9 @@ class User extends Authenticatable
     {
         return $query->where('is_active', true);
     }
+
+    protected static function newFactory()
+    {
+        return \Database\Factories\UserFactory::new();
+    }
 }

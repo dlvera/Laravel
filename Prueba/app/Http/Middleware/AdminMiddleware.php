@@ -10,7 +10,7 @@ class AdminMiddleware
 {
     public function handle(Request $request, Closure $next)
     {
-        // Asumimos que el administrador es el usuario con email 'admin@mailersa.com'
+        // Verificar que el usuario esté autenticado y sea administrador
         if (Auth::check() && Auth::user()->email === 'admin@mailersa.com') {
             return $next($request);
         }
