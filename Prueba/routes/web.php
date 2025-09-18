@@ -26,3 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('emails/{email}/download/{attachment}', [EmailController::class, 'downloadAttachment'])
         ->name('emails.attachment.download');
 });
+
+Route::get('/', function () {
+    return view('home');
+})->name('home');
