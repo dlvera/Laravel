@@ -20,9 +20,9 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('emails.index') }}">Mis Emails</a>
                         </li>
-                        @if(Auth::user()->email === 'admin@mailersa.com')
+                        @if(Auth::user()->is_admin)
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.dashboard') }}">Administración</a>
+                                <a class="nav-link" href="{{ route('admin.users.index') }}">Administración</a>
                             </li>
                         @endif
                     @endauth
@@ -31,7 +31,10 @@
                     @auth
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ Auth::user()->name }}
+                                {{ Auth::user()->name }} 
+                                @if(Auth::user()->is_admin)
+                                    <span class="badge bg-warning">Admin</span>
+                                @endif
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('profile') }}">Mi Perfil</a></li>

@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h2>Dashboard</h2>
+                    <h2>Dashboard - {{ Auth::user()->is_admin ? 'Administrador' : 'Usuario' }}</h2>
                 </div>
 
                 <div class="card-body">
@@ -17,6 +17,7 @@
                     @endif
 
                     <div class="row">
+                        <!-- Tarjeta de Perfil -->
                         <div class="col-md-4">
                             <div class="card text-center">
                                 <div class="card-body">
@@ -29,6 +30,7 @@
                             </div>
                         </div>
                         
+                        <!-- Tarjeta de Emails -->
                         <div class="col-md-4">
                             <div class="card text-center">
                                 <div class="card-body">
@@ -41,6 +43,22 @@
                             </div>
                         </div>
                         
+                        <!-- Tarjeta Específica según tipo de usuario -->
+                        @if(Auth::user()->is_admin)
+                        <!-- Panel de Administración para admins -->
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title">Administración</h5>
+                                    <p class="card-text">Gestionar usuarios del sistema</p>
+                                    <a href="{{ route('admin.users.index') }}" class="btn btn-warning">
+                                        <i class="fas fa-cog"></i> Panel Admin
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @else
+                        <!-- Cerrar Sesión para usuarios normales -->
                         <div class="col-md-4">
                             <div class="card text-center">
                                 <div class="card-body">
@@ -55,11 +73,29 @@
                                 </div>
                             </div>
                         </div>
+                        @endif
                     </div>
 
+                    <!-- Resumen de actividad específico por tipo de usuario -->
                     <div class="mt-4">
                         <h4>Resumen de Actividad</h4>
                         <div class="row">
+                            @if(Auth::user()->is_admin)
+                            <!-- Resumen para administradores -->
+                            <div class="col-md-6">
+                                <div class="alert alert-info">
+                                    <strong>Total de Usuarios:</strong> 
+                                    {{ App\Models\User::count() }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="alert alert-warning">
+                                    <strong>Usuarios Activos:</strong> 
+                                    {{ App\Models\User::where('is_active', true)->count() }}
+                                </div>
+                            </div>
+                            @else
+                            <!-- Resumen para usuarios normales -->
                             <div class="col-md-6">
                                 <div class="alert alert-info">
                                     <strong>Emails Enviados:</strong> 
@@ -72,6 +108,7 @@
                                     {{ Auth::user()->sentEmails()->where('status', 'draft')->count() }}
                                 </div>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>

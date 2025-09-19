@@ -20,6 +20,7 @@ class User extends Authenticatable
         'birth_date',
         'city_id',
         'is_active',
+        'is_admin',
     ];
 
     protected $hidden = [
@@ -30,8 +31,14 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'is_active' => 'boolean',
+        'is_admin' => 'boolean',
         'birth_date' => 'date',
     ];
+
+    public function isAdmin()
+    {
+        return $this->is_admin;
+    }
 
     public function sentEmails()
     {

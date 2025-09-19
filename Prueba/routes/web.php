@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\EmailController;;
-use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\EmailController;
+use App\Http\Controllers\Admin\UserController; 
 use Illuminate\Support\Facades\Route;
 
 // Rutas de autenticación
@@ -36,7 +36,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(fun
     })->name('dashboard');
     
     // Gestión de usuarios
-    Route::resource('users', AdminUserController::class);
-    Route::get('users/states', [AdminUserController::class, 'getStates'])->name('users.states');
-    Route::get('users/cities', [AdminUserController::class, 'getCities'])->name('users.cities');
+    Route::resource('users', UserController::class);
+    Route::get('users/states', [UserController::class, 'getStates'])->name('users.states');
+    Route::get('users/cities', [UserController::class, 'getCities'])->name('users.cities');
 });

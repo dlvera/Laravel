@@ -11,7 +11,7 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         // Verificar que el usuario esté autenticado y sea administrador
-        if (Auth::check() && Auth::user()->email === 'admin@mailersa.com') {
+        if (Auth::check() && Auth::user()->is_admin) {
             return $next($request);
         }
 
