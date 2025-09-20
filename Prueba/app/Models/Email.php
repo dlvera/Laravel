@@ -1,20 +1,20 @@
 <?php
-// app/Models/Email.php
+
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class Email extends Model
-{   
-    
+{
     use HasFactory;
+
     protected $fillable = [
-        'subject', 
-        'recipient',  // Asegurarse de que está incluido
-        'body', 
-        'status', 
-        'user_id', 
+        'subject',
+        'recipient',
+        'body',
+        'status',
+        'user_id',
         'sent_at'
     ];
 
@@ -25,23 +25,5 @@ class Email extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function scopePending($query)
-    {
-        return $query->where('status', 'pending');
-    }
-
-    public function scopeSent($query)
-    {
-        return $query->where('status', 'sent');
-    }
-
-    public function markAsSent()
-    {
-        $this->update([
-            'status' => 'sent',
-            'sent_at' => now()
-        ]);
     }
 }

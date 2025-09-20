@@ -9,9 +9,14 @@ class EmailController extends Controller
 {
     public function index()
     {
-        $emails = Email::where('user_id', auth()->id())
-                      ->orderBy('created_at', 'desc')
-                      ->paginate(10);
+        // Si es admin, ver todos los emails, si no, solo los suyos
+        if (auth()->user()->isAdmin()) {
+            $emails = Email::with('user')->orderBy('created_at', 'desc')->paginate(10);
+        } else {
+            $emails = Email::where('user_id', auth()->id())
+                          ->orderBy('created_at', 'desc')
+                          ->paginate(10);
+        }
         
         return view('emails.index', compact('emails'));
     }
@@ -25,26 +30,34 @@ class EmailController extends Controller
     {
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
-            'recipient' => 'required|email',
+            'recipient' => 'required|email|max:255',
             'body' => 'required|string',
         ]);
 
-        Email::create([
-            'subject' => $validated['subject'],
-            'recipient' => $validated['recipient'],
-            'body' => $validated['body'],
-            'user_id' => auth()->id(),
-            'status' => 'pending'
-        ]);
+        try {
+            Email::create([
+                'subject' => $validated['subject'],
+                'recipient' => $validated['recipient'],
+                'body' => $validated['body'],
+                'user_id' => auth()->id(),
+                'status' => Email::STATUS_PENDING // Usar la constante
+            ]);
 
-        return redirect()->route('emails.index')->with('success', 'Email creado exitosamente.');
+            return redirect()->route('emails.index')
+                ->with('success', 'Email creado exitosamente y encolado para envío.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error al crear el email: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     public function show(Email $email)
     {
-        // Verificar que el usuario puede ver este email
-        if ($email->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
-            abort(403, 'Acceso denegado.');
+        // Verificar permisos
+        if (!$email->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
+            abort(403, 'No tienes permisos para ver este email.');
         }
 
         return view('emails.show', compact('email'));
