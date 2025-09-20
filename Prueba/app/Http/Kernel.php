@@ -3,17 +3,6 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode;
-use Illuminate\Foundation\Http\Middleware\ValidatePostSize;
-use Illuminate\Foundation\Http\Middleware\TrimStrings;
-use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
-use Illuminate\Foundation\Http\Middleware\TrustProxies;
-use Illuminate\Http\Middleware\HandleCors;
-use Illuminate\Http\Middleware\SubstituteBindings;
-use Illuminate\Http\Middleware\ThrottleRequests;
-use Illuminate\Http\Middleware\ValidateCsrfToken;
-use Illuminate\Http\Middleware\VerifyCsrfToken;
-use Illuminate\Http\Middleware\VerifyCsrfToken as BaseVerifyCsrfToken;
 
 class Kernel extends HttpKernel
 {
@@ -26,11 +15,11 @@ class Kernel extends HttpKernel
      */
     protected $middleware = [
         \App\Http\Middleware\TrustProxies::class,
-        \App\Http\Middleware\HandleCors::class,
+        \Illuminate\Http\Middleware\HandleCors::class,
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
-        \App\Http\Middleware\ValidatePostSize::class,
+        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
-        \App\Http\Middleware\ConvertEmptyStringsToNull::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
     ];
 
     /**
@@ -41,20 +30,20 @@ class Kernel extends HttpKernel
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
-            \App\Http\Middleware\AddQueuedCookiesToResponse::class,
-            \App\Http\Middleware\StartSession::class,
-            \App\Http\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
-            \App\Http\Middleware\SubstituteBindings::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
         'api' => [
             \App\Http\Middleware\EncryptCookies::class,
-            \App\Http\Middleware\AddQueuedCookiesToResponse::class,
-            \App\Http\Middleware\StartSession::class,
-            \App\Http\Middleware\ShareErrorsFromSession::class,
-            \App\Http\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\ThrottleRequests::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class,
         ],
     ];
 
@@ -76,5 +65,5 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
-        ];
+    ];
 }

@@ -53,4 +53,66 @@ class UserController extends Controller
         $cities = City::where('state_id', $stateId)->get();
         return response()->json($cities);
     }
+
+     /**
+     * Show the form for editing the specified user.
+     */
+    public function edit(User $user)
+    {
+        // Verificar que solo administradores puedan editar usuarios
+        if (!auth()->user()->is_admin) {
+            abort(403, 'Acceso no autorizado.');
+        }
+
+        $countries = Country::all();
+        return view('users.edit', compact('user', 'countries'));
+    }
+
+    /**
+     * Update the specified user in storage.
+     */
+    public function update(UpdateUserRequest $request, User $user)
+    {
+        // Verificar que solo administradores puedan actualizar usuarios
+        if (!auth()->user()->is_admin) {
+            abort(403, 'Acceso no autorizado.');
+        }
+
+        // Eliminar cédula y email del request para evitar su modificación
+        $data = $request->except(['cedula', 'email']);
+        
+        // Si se proporciona una nueva contraseña, hashearla
+        if (!empty($data['password'])) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Usuario actualizado exitosamente.');
+    }
+
+    /**
+     * Remove the specified user from storage.
+     */
+    public function destroy(User $user)
+    {
+        // Verificar que solo administradores puedan eliminar usuarios
+        if (!auth()->user()->is_admin) {
+            abort(403, 'Acceso no autorizado.');
+        }
+
+        // No permitir que un usuario se elimine a sí mismo
+        if ($user->id === auth()->id()) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'No puedes eliminar tu propio usuario.');
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'Usuario eliminado exitosamente.');
+    }
 }
