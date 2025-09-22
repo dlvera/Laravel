@@ -19,6 +19,8 @@ class User extends Authenticatable
         'cedula',
         'birth_date',
         'city_id',
+        'country_id',
+        'state_id',  
         'is_active',
         'is_admin',
     ];
@@ -46,6 +48,14 @@ class User extends Authenticatable
     }
 
     public function city()
+    {
+        return $this->belongsTo(City::class);
+    }
+    public function country()
+    {
+        return $this->belongsTo(City::class);
+    }
+    public function state()
     {
         return $this->belongsTo(City::class);
     }
