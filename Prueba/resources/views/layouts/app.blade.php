@@ -1,72 +1,54 @@
+<!-- resources/views/layouts/app.blade.php -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>MAILER S.A.</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>MAILER S.A. - @yield('title')</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/js/app.js'])
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ route('dashboard') }}">MAILER S.A.</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+<body class="bg-gray-100">
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <a href="{{ url('/') }}" class="text-xl font-bold">MAILER S.A.</a>
+                
+                <div class="flex items-center space-x-4">
                     @auth
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('emails.index') }}">Mis Emails</a>
-                        </li>
-                        @if(Auth::check() && Auth::user()->is_admin)
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.users.index') }}">Gestión de Usuarios</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.dashboard') }}">Panel Admin</a>
-                            </li>
+                        <span>Hola, {{ auth()->user()->name }}</span>
+                        @if(auth()->user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="hover:bg-blue-700 px-3 py-2 rounded">Admin</a>
                         @endif
-                    @endauth
-                </ul>
-                <ul class="navbar-nav">
-                    @auth
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ Auth::user()->name }} 
-                                @if(Auth::user()->is_admin)
-                                    <span class="badge bg-warning">Admin</span>
-                                @endif
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('profile') }}">Mi Perfil</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item">Cerrar Sesión</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
+                        <a href="{{ route('emails.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded">Emails</a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="hover:bg-blue-700 px-3 py-2 rounded">Cerrar Sesión</button>
+                        </form>
                     @else
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Iniciar Sesión</a>
-                        </li>
+                        <a href="{{ route('login') }}" class="hover:bg-blue-700 px-3 py-2 rounded">Login</a>
                     @endauth
-                </ul>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
-        @yield('content')
-    </div>
+    <main class="py-6">
+        <div class="max-w-7xl mx-auto px-4">
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    @yield('scripts')
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            @yield('content')
+        </div>
+    </main>
 </body>
 </html>

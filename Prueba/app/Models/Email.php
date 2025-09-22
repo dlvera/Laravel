@@ -1,72 +1,44 @@
 <?php
-
+// app/Models/Email.php
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Email extends Model
 {
     use HasFactory;
-
-    protected $fillable = [
-        'user_id',
-        'recipient_email',
-        'subject',
-        'body',
-        'sent_at',
-        'status',
-    ];
+    protected $fillable = ['subject', 'recipient', 'body', 'status', 'user_id', 'sent_at'];
 
     protected $casts = [
         'sent_at' => 'datetime',
     ];
 
-    /**
-     * Relación: Un email pertenece a un usuario
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relación: Un email puede tener múltiples archivos adjuntos
-     */
-    public function attachments()
+    // Scopes
+    public function scopePending($query)
     {
-        return $this->hasMany(EmailAttachment::class);
+        return $query->where('status', 'pending');
     }
 
-    /**
-     * Scope para emails enviados
-     */
     public function scopeSent($query)
     {
         return $query->where('status', 'sent');
     }
 
-    /**
-     * Scope para borradores
-     */
-    public function scopeDraft($query)
-    {
-        return $query->where('status', 'draft');
-    }
-
-    /**
-     * Marcar email como enviado
-     */
     public function markAsSent()
     {
         $this->update([
             'status' => 'sent',
-            'sent_at' => now(),
+            'sent_at' => now()
         ]);
     }
 
-    protected static function newFactory()
-{
-    return \Database\Factories\EmailFactory::new();
-}
+    public function markAsFailed()
+    {
+        $this->update(['status' => 'failed']);
+    }
 }

@@ -2,71 +2,70 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'identifier',
         'name',
-        'email',
+        'email', 
         'password',
         'phone',
         'cedula',
         'birth_date',
         'city_id',
-        'country_id',
-        'state_id',  
-        'is_active',
-        'is_admin',
+        'role'
     ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
+    protected $hidden = ['password', 'remember_token'];
+    
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'is_active' => 'boolean',
-        'is_admin' => 'boolean',
         'birth_date' => 'date',
+        'email_verified_at' => 'datetime',
     ];
 
-    public function isAdmin()
-    {
-        return $this->is_admin;
-    }
-
-    public function sentEmails()
-    {
-        return $this->hasMany(Email::class);
-    }
-
+    // Relaciones
     public function city()
     {
         return $this->belongsTo(City::class);
     }
-    public function country()
+
+    public function emails()
     {
-        return $this->belongsTo(City::class);
-    }
-    public function state()
-    {
-        return $this->belongsTo(City::class);
+        return $this->hasMany(Email::class);
     }
 
-    public function scopeActive($query)
+    // Accesores
+    public function getAgeAttribute()
     {
-        return $query->where('is_active', true);
+        return $this->birth_date->age;
     }
 
-    protected static function newFactory()
+    public function getFullLocationAttribute()
     {
-        return \Database\Factories\UserFactory::new();
+        if ($this->city) {
+            return "{$this->city->name}, {$this->city->state->name}, {$this->city->state->country->name}";
+        }
+        return 'No especificada';
+    }
+
+    // Scopes
+    public function scopeAdmins($query)
+    {
+        return $query->where('role', 'admin');
+    }
+
+    public function scopeRegularUsers($query)
+    {
+        return $query->where('role', 'user');
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
     }
 }
