@@ -39,7 +39,7 @@ class UserController extends Controller
             ->orderBy($sortField, $sortDirection)
             ->paginate($perPage);
 
-        return view('admin.users.index', compact('users', 'perPage', 'search', 'sortField', 'sortDirection'));
+        return view('users.index', compact('users', 'perPage', 'search', 'sortField', 'sortDirection'));
     }
 
     public function getStates($countryId)
