@@ -1,44 +1,37 @@
 <?php
-
-use App\Http\Controllers\Auth\LoginController;
+// routes/web.php
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\Admin\UserController;
-use App\Http\Controllers\Api\LocationController;
 use Illuminate\Support\Facades\Route;
 
-// Rutas públicas
-Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/', [LoginController::class, 'login']);
+// Rutas de autenticación
+Auth::routes(['register' => false]); // Deshabilitar registro si no es necesario
 
+// Ruta principal
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Rutas protegidas
 Route::middleware(['auth'])->group(function () {
-
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    // Dashboard según rol
+    Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
     
-    // Dashboard
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    
-    // Módulo de emails (accesible para todos los usuarios autenticados)
+    // Módulo de emails para todos los usuarios autenticados
     Route::resource('emails', EmailController::class)->except(['edit', 'update']);
     
-    // Rutas de administración
+    // Rutas de administración (solo para admins)
     Route::prefix('admin')->middleware('admin')->group(function () {
+        Route::get('/dashboard', [HomeController::class, 'adminDashboard'])->name('admin.dashboard');
         Route::resource('users', UserController::class);
-        Route::get('/dashboard', function () {
-            $usersCount = \App\Models\User::count();
-            $emailsCount = \App\Models\Email::count();
-            $pendingEmails = \App\Models\Email::where('status', 'pending')->count();
-            
-            return view('admin.dashboard', compact('usersCount', 'emailsCount', 'pendingEmails'));
-        })->name('admin.dashboard');
     });
 });
 
-// Rutas API para ubicaciones
-Route::prefix('api')->group(function () {
-    Route::get('/countries', [LocationController::class, 'countries']);
-    Route::get('/countries/{countryId}/states', [LocationController::class, 'states']);
-    Route::get('/states/{stateId}/cities', [LocationController::class, 'cities']);
-    Route::get('/cities/{code}', [LocationController::class, 'cityByCode']);
-});
+// Redirección post-login (Laravel automáticamente redirige a /home)
+// Asegúrate de que RedirectIfAuthenticated middleware esté configurado correctamente
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
