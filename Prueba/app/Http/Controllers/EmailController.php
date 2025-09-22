@@ -2,37 +2,17 @@
 // app/Http/Controllers/EmailController.php
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreEmailRequest;
-use App\Models\Email;
-use App\Jobs\SendEmailJob;
 use Illuminate\Http\Request;
+use App\Models\Email;
 
 class EmailController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $query = Email::with('user');
+        $emails = Email::where('user_id', auth()->id())
+                      ->orderBy('created_at', 'desc')
+                      ->paginate(10);
         
-        // Si no es admin, solo ver sus emails
-        if (!auth()->user()->isAdmin()) {
-            $query->where('user_id', auth()->id());
-        }
-
-        // Filtros
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('subject', 'like', "%{$search}%")
-                  ->orWhere('recipient', 'like', "%{$search}%");
-            });
-        }
-
-        $emails = $query->orderBy('created_at', 'desc')->paginate(10);
-
         return view('emails.index', compact('emails'));
     }
 
@@ -41,28 +21,30 @@ class EmailController extends Controller
         return view('emails.create');
     }
 
-    public function store(StoreEmailRequest $request)
+    public function store(Request $request)
     {
-        $email = Email::create([
-            'subject' => $request->subject,
-            'recipient' => $request->recipient,
-            'body' => $request->body,
+        $validated = $request->validate([
+            'subject' => 'required|string|max:255',
+            'recipient' => 'required|email',
+            'body' => 'required|string',
+        ]);
+
+        Email::create([
+            'subject' => $validated['subject'],
+            'recipient' => $validated['recipient'],
+            'body' => $validated['body'],
             'user_id' => auth()->id(),
             'status' => 'pending'
         ]);
 
-        // Encolar el job para enviar el email
-        SendEmailJob::dispatch($email);
-
-        return redirect()->route('emails.index')
-            ->with('success', 'Email creado y encolado para envío.');
+        return redirect()->route('emails.index')->with('success', 'Email creado exitosamente.');
     }
 
     public function show(Email $email)
     {
-        // Verificar permisos
-        if (!auth()->user()->isAdmin() && $email->user_id !== auth()->id()) {
-            abort(403);
+        // Verificar que el usuario puede ver este email
+        if ($email->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
+            abort(403, 'Acceso denegado.');
         }
 
         return view('emails.show', compact('email'));

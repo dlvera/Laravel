@@ -1,10 +1,8 @@
 <?php
-
+// app/Http/Controllers/Admin/UserController.php
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\StoreUserRequest;
-use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use App\Models\Country;
 use Illuminate\Http\Request;
@@ -13,9 +11,9 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with('city.state.country');
+        $query = User::query();
         
-        // Filtro general
+        // Filtro de búsqueda
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -26,27 +24,8 @@ class UserController extends Controller
             });
         }
 
-        // Ordenamiento
-        if ($request->has('sort') && $request->has('direction')) {
-            $query->orderBy($request->sort, $request->direction);
-        } else {
-            $query->orderBy('created_at', 'desc');
-        }
-
-        $users = $query->paginate($request->get('per_page', 10));
+        $users = $query->orderBy('created_at', 'desc')->paginate(10);
         
-        if ($request->ajax()) {
-            return response()->json([
-                'users' => $users->items(),
-                'pagination' => [
-                    'current_page' => $users->currentPage(),
-                    'last_page' => $users->lastPage(),
-                    'per_page' => $users->perPage(),
-                    'total' => $users->total(),
-                ]
-            ]);
-        }
-
         return view('admin.users.index', compact('users'));
     }
 
@@ -56,15 +35,25 @@ class UserController extends Controller
         return view('admin.users.create', compact('countries'));
     }
 
-    public function store(StoreUserRequest $request)
+    public function store(Request $request)
     {
-        $userData = $request->validated();
-        $userData['password'] = bcrypt($userData['password']);
-        
-        User::create($userData);
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:8|confirmed',
+            'cedula' => 'required|string|max:11',
+            'phone' => 'nullable|digits:10',
+            'birth_date' => 'required|date|before_or_equal:-18 years',
+            'city_id' => 'required|exists:cities,id',
+        ]);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario creado exitosamente.');
+        $validated['password'] = bcrypt($validated['password']);
+        $validated['role'] = 'user';
+        $validated['identifier'] = mt_rand(100000, 999999); // Generar identificador único
+
+        User::create($validated);
+
+        return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente.');
     }
 
     public function edit(User $user)
@@ -73,24 +62,27 @@ class UserController extends Controller
         return view('admin.users.edit', compact('user', 'countries'));
     }
 
-    public function update(UpdateUserRequest $request, User $user)
+    public function update(Request $request, User $user)
     {
-        $user->update($request->validated());
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'phone' => 'nullable|digits:10',
+            'birth_date' => 'required|date|before_or_equal:-18 years',
+            'city_id' => 'required|exists:cities,id',
+        ]);
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario actualizado exitosamente.');
+        $user->update($validated);
+
+        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado exitosamente.');
     }
 
     public function destroy(User $user)
     {
-        // Prevenir que el admin se elimine a sí mismo
         if ($user->id === auth()->id()) {
             return redirect()->back()->with('error', 'No puedes eliminar tu propio usuario.');
         }
 
         $user->delete();
-
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario eliminado exitosamente.');
+        return redirect()->route('admin.users.index')->with('success', 'Usuario eliminado exitosamente.');
     }
 }

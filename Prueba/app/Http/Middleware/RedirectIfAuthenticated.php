@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Middleware/RedirectIfAuthenticated.php
 namespace App\Http\Middleware;
 
 use App\Providers\RouteServiceProvider;
@@ -16,14 +16,8 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                // Redirigir según el rol del usuario
-                $user = Auth::guard($guard)->user();
-                
-                if ($user->isAdmin()) {
-                    return redirect()->route('admin.dashboard');
-                } else {
-                    return redirect()->route('emails.index');
-                }
+                // NO redirigir automáticamente - dejar que el controlador decida
+                return $next($request);
             }
         }
 

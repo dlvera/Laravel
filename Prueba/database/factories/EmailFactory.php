@@ -11,7 +11,7 @@ class EmailFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'recipient_email' => $this->faker->email,
+            'recipient' => $this->faker->email,
             'subject' => $this->faker->sentence,
             'body' => $this->faker->paragraphs(3, true),
             'status' => 'sent',

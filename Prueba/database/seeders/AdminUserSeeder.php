@@ -22,6 +22,19 @@ class AdminUserSeeder extends Seeder
             'role' => 'admin'
         ]);
 
+        // Usuario normal para testing
+        User::create([
+            'identifier' => 'USER001',
+            'name' => 'Usuario Normal',
+            'email' => 'user@example.com',
+            'password' => Hash::make('User123!'),
+            'cedula' => '10000000001',
+            'birth_date' => '1990-01-01',
+            'phone' => '3001234568',
+            'city_id' => 1,
+            'role' => 'user'
+        ]);
+
         $this->command->info('Usuario administrador creado exitosamente!');
         $this->command->info('Email: admin@mailer.com');
         $this->command->info('Password: Admin123!');

@@ -4,10 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+
 class Email extends Model
-{
+{   
+    
     use HasFactory;
-    protected $fillable = ['subject', 'recipient', 'body', 'status', 'user_id', 'sent_at'];
+    protected $fillable = [
+        'subject', 
+        'recipient',  // Asegurarse de que está incluido
+        'body', 
+        'status', 
+        'user_id', 
+        'sent_at'
+    ];
 
     protected $casts = [
         'sent_at' => 'datetime',
@@ -18,7 +27,6 @@ class Email extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Scopes
     public function scopePending($query)
     {
         return $query->where('status', 'pending');
@@ -35,10 +43,5 @@ class Email extends Model
             'status' => 'sent',
             'sent_at' => now()
         ]);
-    }
-
-    public function markAsFailed()
-    {
-        $this->update(['status' => 'failed']);
     }
 }

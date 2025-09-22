@@ -1,37 +1,46 @@
 <?php
 // routes/web.php
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\Admin\UserController;
-use Illuminate\Support\Facades\Route;
 
-// Rutas de autenticación
-Auth::routes(['register' => false]); // Deshabilitar registro si no es necesario
-
-// Ruta principal
+// Ruta principal - siempre pública
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Rutas protegidas
+// Rutas de autenticación de Laravel
+Auth::routes(['register' => false]);
+
+// Rutas protegidas por autenticación
 Route::middleware(['auth'])->group(function () {
-    // Dashboard según rol
+    
+    // Dashboard principal - redirige según el rol
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
     
-    // Módulo de emails para todos los usuarios autenticados
-    Route::resource('emails', EmailController::class)->except(['edit', 'update']);
+    // Módulo de emails - accesible para todos los usuarios autenticados
+    Route::get('/emails', [EmailController::class, 'index'])->name('emails.index');
+    Route::get('/emails/create', [EmailController::class, 'create'])->name('emails.create');
+    Route::post('/emails', [EmailController::class, 'store'])->name('emails.store');
+    Route::get('/emails/{email}', [EmailController::class, 'show'])->name('emails.show');
     
-    // Rutas de administración (solo para admins)
+    // Rutas de administración - solo para admins
     Route::prefix('admin')->middleware('admin')->group(function () {
+        // Dashboard de admin
         Route::get('/dashboard', [HomeController::class, 'adminDashboard'])->name('admin.dashboard');
-        Route::resource('users', UserController::class);
+        
+        // Gestión de usuarios
+        Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
+        Route::get('/users/create', [UserController::class, 'create'])->name('admin.users.create');
+        Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
     });
 });
 
-// Redirección post-login (Laravel automáticamente redirige a /home)
-// Asegúrate de que RedirectIfAuthenticated middleware esté configurado correctamente
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+// Ruta de logout personalizada
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout');
