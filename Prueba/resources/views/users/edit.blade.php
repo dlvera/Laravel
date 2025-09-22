@@ -1,202 +1,254 @@
 @extends('layouts.app')
 
+@section('title', 'Editar Usuario')
+
 @section('content')
-<div class="container mx-auto px-4 py-6">
-    <h2 class="text-2xl font-semibold mb-6">Editar Usuario</h2>
-
-    <form method="POST" action="{{ route('admin.users.update', $user) }}" class="bg-white rounded-lg shadow-md p-6">
-        @csrf
-        @method('PUT')
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <!-- Cédula (solo lectura) -->
-            <div>
-                <label for="cedula" class="block text-gray-700 font-medium mb-2">Cédula</label>
-                <input type="text" id="cedula" name="cedula" value="{{ old('cedula', $user->cedula) }}" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" 
-                    readonly>
-                @error('cedula')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Email (solo lectura) -->
-            <div>
-                <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>
-                <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-100" 
-                    readonly>
-                @error('email')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Nombre -->
-            <div>
-                <label for="name" class="block text-gray-700 font-medium mb-2">Nombre</label>
-                <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                    required>
-                @error('name')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Teléfono -->
-            <div>
-                <label for="phone" class="block text-gray-700 font-medium mb-2">Teléfono</label>
-                <input type="text" id="phone" name="phone" value="{{ old('phone', $user->phone) }}" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @error('phone')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- País -->
-            <div>
-                <label for="country_id" class="block text-gray-700 font-medium mb-2">País</label>
-                <select id="country_id" name="country_id" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">Seleccione un país</option>
-                    @foreach($countries as $country)
-                        <option value="{{ $country->id }}" 
-                            {{ old('country_id', $user->country_id) == $country->id ? 'selected' : '' }}>
-                            {{ $country->name }}
-                        </option>
-                    @endforeach
-                </select>
-                @error('country_id')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Estado -->
-            <div>
-                <label for="state_id" class="block text-gray-700 font-medium mb-2">Estado/Provincia</label>
-                <select id="state_id" name="state_id" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">Seleccione un estado</option>
-                    @if($user->state_id)
-                        <option value="{{ $user->state_id }}" selected>{{ $user->state->name }}</option>
-                    @endif
-                </select>
-                @error('state_id')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Ciudad -->
-            <div>
-                <label for="city_id" class="block text-gray-700 font-medium mb-2">Ciudad</label>
-                <select id="city_id" name="city_id" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                    <option value="">Seleccione una ciudad</option>
-                    @if($user->city_id)
-                        <option value="{{ $user->city_id }}" selected>{{ $user->city->name }}</option>
-                    @endif
-                </select>
-                @error('city_id')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Nueva Contraseña (opcional) -->
-            <div>
-                <label for="password" class="block text-gray-700 font-medium mb-2">Nueva Contraseña (opcional)</label>
-                <input type="password" id="password" name="password" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                @error('password')
-                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                @enderror
-            </div>
-
-            <!-- Confirmar Contraseña -->
-            <div>
-                <label for="password_confirmation" class="block text-gray-700 font-medium mb-2">Confirmar Contraseña</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" 
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            </div>
-        </div>
-
-        <div class="flex justify-end space-x-4">
-            <a href="{{ route('admin.users.index') }}" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors">
-                Cancelar
-            </a>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                Actualizar Usuario
-            </button>
-        </div>
-    </form>
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Editar Usuario: {{ $user->name }}</h1>
+    <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
 </div>
 
-<!-- Script para los dropdowns dependientes -->
+<div class="card">
+    <div class="card-body">
+        <form action="{{ route('admin.users.update', $user) }}" method="POST">
+            @csrf
+            @method('PUT')
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="cedula" class="form-label">Cédula</label>
+                        <input type="text" class="form-control bg-light" value="{{ $user->cedula }}" readonly>
+                        <small class="form-text text-muted">La cédula no se puede modificar</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control bg-light" value="{{ $user->email }}" readonly>
+                        <small class="form-text text-muted">El email no se puede modificar</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre *</label>
+                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
+                               id="name" name="name" value="{{ old('name', $user->name) }}" required>
+                        @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Teléfono</label>
+                        <input type="text" class="form-control @error('phone') is-invalid @enderror" 
+                               id="phone" name="phone" value="{{ old('phone', $user->phone) }}">
+                        @error('phone')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="country_id" class="form-label">País *</label>
+                        <select class="form-control @error('country_id') is-invalid @enderror" 
+                                id="country_id" name="country_id" required>
+                            <option value="">Seleccione un país</option>
+                            @foreach($countries as $country)
+                                <option value="{{ $country->id }}" 
+                                    {{ old('country_id', $user->country_id) == $country->id ? 'selected' : '' }}>
+                                    {{ $country->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('country_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="state_id" class="form-label">Estado/Provincia *</label>
+                        <select class="form-control @error('state_id') is-invalid @enderror" 
+                                id="state_id" name="state_id" required>
+                            <option value="">Seleccione un estado</option>
+                            @if(isset($states) && $states->count() > 0)
+                                @foreach($states as $state)
+                                    <option value="{{ $state->id }}" 
+                                        {{ old('state_id', $user->state_id) == $state->id ? 'selected' : '' }}>
+                                        {{ $state->name }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        @error('state_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="city_id" class="form-label">Ciudad *</label>
+                        <select class="form-control @error('city_id') is-invalid @enderror" 
+                                id="city_id" name="city_id" required>
+                            <option value="">Seleccione una ciudad</option>
+                            @if(isset($cities) && $cities->count() > 0)
+                                @foreach($cities as $city)
+                                    <option value="{{ $city->id }}" 
+                                        {{ old('city_id', $user->city_id) == $city->id ? 'selected' : '' }}>
+                                        {{ $city->name }}
+                                    </option>
+                                @endforeach
+                            @endif
+                        </select>
+                        @error('city_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Nueva Contraseña (opcional)</label>
+                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
+                               id="password" name="password">
+                        @error('password')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label for="password_confirmation" class="form-label">Confirmar Contraseña</label>
+                        <input type="password" class="form-control" 
+                               id="password_confirmation" name="password_confirmation">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" 
+                            {{ old('is_active', $user->is_active) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="is_active">Usuario Activo</label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" value="1" 
+                            {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="is_admin">Usuario Administrador</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary">Actualizar Usuario</button>
+                <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Cargar estados cuando se selecciona un país
-        document.getElementById('country_id').addEventListener('change', function() {
-            const countryId = this.value;
-            const stateSelect = document.getElementById('state_id');
-            
-            stateSelect.innerHTML = '<option value="">Seleccione un estado</option>';
-            document.getElementById('city_id').innerHTML = '<option value="">Seleccione una ciudad</option>';
-            
-            if (countryId) {
-                fetch(`/admin/users/states?country_id=${countryId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.forEach(state => {
-                            const option = document.createElement('option');
-                            option.value = state.id;
-                            option.textContent = state.name;
-                            stateSelect.appendChild(option);
-                        });
-                    });
-            }
-        });
+document.addEventListener('DOMContentLoaded', function() {
+    const countrySelect = document.getElementById('country_id');
+    const stateSelect = document.getElementById('state_id');
+    const citySelect = document.getElementById('city_id');
 
-        // Cargar ciudades cuando se selecciona un estado
-        document.getElementById('state_id').addEventListener('change', function() {
-            const stateId = this.value;
-            const citySelect = document.getElementById('city_id');
-            
-            citySelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
-            
-            if (stateId) {
-                fetch(`/admin/users/cities?state_id=${stateId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        data.forEach(city => {
-                            const option = document.createElement('option');
-                            option.value = city.id;
-                            option.textContent = city.name;
-                            citySelect.appendChild(option);
-                        });
-                    });
-            }
-        });
+    // Usar URLs de Laravel
+    const baseUrl = "{{ url('/') }}";
 
-        // Disparar el evento change si ya hay un país seleccionado
-        const countrySelect = document.getElementById('country_id');
-        if (countrySelect.value) {
-            countrySelect.dispatchEvent(new Event('change'));
-            
-            // Una vez cargados los estados, seleccionar el estado actual del usuario
-            setTimeout(() => {
-                const stateSelect = document.getElementById('state_id');
-                if (stateSelect && '{{ $user->state_id }}') {
-                    stateSelect.value = '{{ $user->state_id }}';
-                    stateSelect.dispatchEvent(new Event('change'));
-                    
-                    // Una vez cargadas las ciudades, seleccionar la ciudad actual del usuario
-                    setTimeout(() => {
-                        const citySelect = document.getElementById('city_id');
-                        if (citySelect && '{{ $user->city_id }}') {
-                            citySelect.value = '{{ $user->city_id }}';
+    // Cargar estados cuando cambia el país
+    countrySelect.addEventListener('change', function() {
+        const countryId = this.value;
+        stateSelect.innerHTML = '<option value="">Seleccione un estado</option>';
+        citySelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+        
+        if (countryId) {
+            fetch(`${baseUrl}/admin/users/ajax/states?country_id=${countryId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la petición');
+                    }
+                    return response.json();
+                })
+                .then(states => {
+                    if (states.length > 0) {
+                        states.forEach(state => {
+                            const option = new Option(state.name, state.id);
+                            stateSelect.add(option);
+                        });
+                        
+                        // Si hay un estado seleccionado previamente, seleccionarlo
+                        const selectedStateId = "{{ old('state_id', $user->state_id) }}";
+                        if (selectedStateId && countryId == "{{ old('country_id', $user->country_id) }}") {
+                            stateSelect.value = selectedStateId;
+                            // Disparar change event para cargar ciudades
+                            stateSelect.dispatchEvent(new Event('change'));
                         }
-                    }, 500);
-                }
-            }, 500);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading states:', error);
+                    stateSelect.innerHTML = '<option value="">Error cargando estados</option>';
+                });
         }
     });
+
+    // Cargar ciudades cuando cambia el estado
+    stateSelect.addEventListener('change', function() {
+        const stateId = this.value;
+        citySelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
+        
+        if (stateId) {
+            fetch(`${baseUrl}/admin/users/ajax/cities/${stateId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Error en la petición');
+                    }
+                    return response.json();
+                })
+                .then(cities => {
+                    if (cities.length > 0) {
+                        cities.forEach(city => {
+                            const option = new Option(city.name, city.id);
+                            citySelect.add(option);
+                        });
+                        
+                        // Si hay una ciudad seleccionada previamente, seleccionarla
+                        const selectedCityId = "{{ old('city_id', $user->city_id) }}";
+                        if (selectedCityId && stateId == "{{ old('state_id', $user->state_id) }}") {
+                            citySelect.value = selectedCityId;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading cities:', error);
+                    citySelect.innerHTML = '<option value="">Error cargando ciudades</option>';
+                });
+        }
+    });
+
+    // Si hay un país seleccionado, cargar sus estados al iniciar
+    const selectedCountryId = countrySelect.value;
+    if (selectedCountryId) {
+        countrySelect.dispatchEvent(new Event('change'));
+    }
+});
 </script>
+@endpush
 @endsection
