@@ -36,6 +36,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+
+        Route::get('/users/ajax/states', [UserController::class, 'getStates'])->name('admin.users.states');
+        Route::get('/users/ajax/cities/{state}', [UserController::class, 'getCities'])->name('admin.users.cities');
     });
 });
 

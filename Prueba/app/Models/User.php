@@ -28,7 +28,30 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    // Relaciones
+    public function country()
+    {
+        return $this->hasOneThrough(
+            Country::class,
+            City::class,
+            'id', // Foreign key on cities table
+            'id', // Foreign key on countries table
+            'city_id', // Local key on users table
+            'country_id' // Local key on cities table
+        );
+    }
+
+    public function state()
+    {
+        return $this->hasOneThrough(
+            State::class,
+            City::class,
+            'id', // Foreign key on cities table
+            'id', // Foreign key on states table
+            'city_id', // Local key on users table
+            'state_id' // Local key on cities table
+        );
+    }
+
     public function city()
     {
         return $this->belongsTo(City::class);
@@ -42,7 +65,7 @@ class User extends Authenticatable
     // Accesores
     public function getAgeAttribute()
     {
-        return $this->birth_date->age;
+        return $this->birth_date ? $this->birth_date->age : null;
     }
 
     public function getFullLocationAttribute()
