@@ -9,6 +9,12 @@ class Email extends Model
 {
     use HasFactory;
 
+    // Agregar constantes de estado
+    const STATUS_PENDING = 'pending';
+    const STATUS_SENDING = 'sending';
+    const STATUS_SENT = 'sent';
+    const STATUS_FAILED = 'failed';
+
     protected $fillable = [
         'subject',
         'recipient',
@@ -25,5 +31,19 @@ class Email extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Agregar métodos para cambiar estado
+    public function markAsSent()
+    {
+        $this->update([
+            'status' => self::STATUS_SENT,
+            'sent_at' => now()
+        ]);
+    }
+
+    public function markAsFailed()
+    {
+        $this->update(['status' => self::STATUS_FAILED]);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Email;
+use App\Http\Requests\StoreEmailRequest;
+use App\Jobs\SendEmailJob;
 
 class EmailController extends Controller
 {
@@ -26,22 +28,19 @@ class EmailController extends Controller
         return view('emails.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreEmailRequest $request)
     {
-        $validated = $request->validate([
-            'subject' => 'required|string|max:255',
-            'recipient' => 'required|email|max:255',
-            'body' => 'required|string',
-        ]);
-
         try {
-            Email::create([
-                'subject' => $validated['subject'],
-                'recipient' => $validated['recipient'],
-                'body' => $validated['body'],
+            $email = Email::create([
+                'subject' => $request->subject,
+                'recipient' => $request->recipient,
+                'body' => $request->body,
                 'user_id' => auth()->id(),
-                'status' => Email::STATUS_PENDING // Usar la constante
+                'status' => Email::STATUS_PENDING
             ]);
+
+            // Despachar job para enviar email
+            SendEmailJob::dispatch($email);
 
             return redirect()->route('emails.index')
                 ->with('success', 'Email creado exitosamente y encolado para envío.');
@@ -55,8 +54,8 @@ class EmailController extends Controller
 
     public function show(Email $email)
     {
-        // Verificar permisos
-        if (!$email->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
+        // Verificar permisos - corrección de la condición
+        if ($email->user_id !== auth()->id() && !auth()->user()->isAdmin()) {
             abort(403, 'No tienes permisos para ver este email.');
         }
 

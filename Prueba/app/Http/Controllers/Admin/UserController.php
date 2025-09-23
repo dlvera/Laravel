@@ -8,6 +8,7 @@ use App\Models\Country;
 use App\Models\City;
 use App\Models\State;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -101,20 +102,19 @@ class UserController extends Controller
             'city_id' => $validated['city_id'],
         ];
 
-        // 🔥 ACTUALIZAR PASSWORD SOLO SI SE PROPORCIONA
+        // ACTUALIZAR PASSWORD SOLO SI SE PROPORCIONA
         if ($request->filled('password')) {
             $updateData['password'] = bcrypt($validated['password']);
         }
 
-        // 🔥 DEBUG: Ver qué datos se van a actualizar
-        \Log::info('Actualizando usuario:', $updateData);
+        // DEBUG: Ver qué datos se van a actualizar
+        Log::info('Actualizando usuario:', $updateData);
         
         $user->update($updateData);
 
         return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado exitosamente.');
     }
-        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado exitosamente.');
-    }
+
 
     public function destroy(User $user)
     {
@@ -129,7 +129,7 @@ class UserController extends Controller
     public function getStates(Request $request)
     {
         $countryId = $request->country_id;
-        $states = State::where('country_id', $countryId)->get();
+        $states = \App\Models\State::where('country_id', $countryId)->get();
         return response()->json($states);
     }
 

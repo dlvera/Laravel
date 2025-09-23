@@ -3,160 +3,165 @@
 @section('title', 'Editar Usuario')
 
 @section('content')
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Editar Usuario: {{ $user->name }}</h1>
-    <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Volver
-    </a>
-</div>
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold">Editar Usuario: {{ $user->name }}</h1>
+        <a href="{{ route('admin.users.index') }}" class="bg-gray-600 text-white px-4 py-2 rounded">
+            ← Volver
+        </a>
+    </div>
 
-<div class="card">
-    <div class="card-body">
+    @if ($errors->any())
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <strong>Errores encontrados:</strong>
+            <ul class="mt-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <div class="bg-white p-6 rounded-lg shadow">
         <form action="{{ route('admin.users.update', $user) }}" method="POST">
             @csrf
             @method('PUT')
             
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="cedula" class="form-label">Cédula</label>
-                        <input type="text" class="form-control bg-light" value="{{ $user->cedula }}" readonly>
-                        <small class="form-text text-muted">La cédula no se puede modificar</small>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control bg-light" value="{{ $user->email }}" readonly>
-                        <small class="form-text text-muted">El email no se puede modificar</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Nombre *</label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                               id="name" name="name" value="{{ old('name', $user->name) }}" required>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Columna izquierda -->
+                <div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Nombre *</label>
+                        <input type="text" name="name" value="{{ old('name', $user->name) }}" required
+                               class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 @error('name') border-red-500 @enderror">
                         @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" value="{{ $user->email }}" readonly
+                               class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2">
+                        <small class="text-gray-500">El email no se puede modificar</small>
+                        <!-- 🔥 ENVIAR EMAIL COMO HIDDEN -->
+                        <input type="hidden" name="email" value="{{ $user->email }}">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Cédula</label>
+                        <input type="text" value="{{ $user->cedula }}" readonly
+                               class="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md px-3 py-2">
+                        <small class="text-gray-500">La cédula no se puede modificar</small>
+                        <!-- 🔥 ENVIAR CÉDULA COMO HIDDEN -->
+                        <input type="hidden" name="cedula" value="{{ $user->cedula }}">
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="phone" class="form-label">Teléfono</label>
-                        <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                               id="phone" name="phone" value="{{ old('phone', $user->phone) }}">
+
+                <!-- Columna derecha -->
+                <div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Teléfono</label>
+                        <input type="text" name="phone" value="{{ old('phone', $user->phone) }}"
+                               class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 @error('phone') border-red-500 @enderror">
                         @error('phone')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="country_id" class="form-label">País *</label>
-                        <select class="form-control @error('country_id') is-invalid @enderror" 
-                                id="country_id" name="country_id" required>
-                            <option value="">Seleccione un país</option>
-                            @foreach($countries as $country)
-                                <option value="{{ $country->id }}" 
-                                    {{ old('country_id', $user->country_id) == $country->id ? 'selected' : '' }}>
-                                    {{ $country->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('country_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Fecha de Nacimiento *</label>
+                        <input type="date" name="birth_date" 
+                               value="{{ old('birth_date', $user->birth_date ? $user->birth_date->format('Y-m-d') : '') }}" 
+                               required
+                               class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 @error('birth_date') border-red-500 @enderror">
+                        @error('birth_date')
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="state_id" class="form-label">Estado/Provincia *</label>
-                        <select class="form-control @error('state_id') is-invalid @enderror" 
-                                id="state_id" name="state_id" required>
-                            <option value="">Seleccione un estado</option>
-                            @if(isset($states) && $states->count() > 0)
-                                @foreach($states as $state)
-                                    <option value="{{ $state->id }}" 
-                                        {{ old('state_id', $user->state_id) == $state->id ? 'selected' : '' }}>
-                                        {{ $state->name }}
-                                    </option>
-                                @endforeach
-                            @endif
-                        </select>
-                        @error('state_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label for="city_id" class="form-label">Ciudad *</label>
-                        <select class="form-control @error('city_id') is-invalid @enderror" 
-                                id="city_id" name="city_id" required>
-                            <option value="">Seleccione una ciudad</option>
-                            @if(isset($cities) && $cities->count() > 0)
-                                @foreach($cities as $city)
-                                    <option value="{{ $city->id }}" 
-                                        {{ old('city_id', $user->city_id) == $city->id ? 'selected' : '' }}>
-                                        {{ $city->name }}
-                                    </option>
-                                @endforeach
-                            @endif
-                        </select>
-                        @error('city_id')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Nueva Contraseña (opcional)</label>
-                        <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                               id="password" name="password">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Nueva Contraseña (opcional)</label>
+                        <input type="password" name="password" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 @error('password') border-red-500 @enderror"
+                               placeholder="Dejar en blanco para no cambiar">
                         @error('password')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <span class="text-red-500 text-sm">{{ $message }}</span>
                         @enderror
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label for="password_confirmation" class="form-label">Confirmar Contraseña</label>
-                        <input type="password" class="form-control" 
-                               id="password_confirmation" name="password_confirmation">
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Confirmar Contraseña</label>
+                        <input type="password" name="password_confirmation" 
+                               class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2"
+                               placeholder="Repetir nueva contraseña">
                     </div>
                 </div>
             </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active" value="1" 
-                            {{ old('is_active', $user->is_active) ? 'checked' : '' }}>
-                        <label class="form-check-label" for="is_active">Usuario Activo</label>
-                    </div>
+            <!-- Selects de ubicación -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">País *</label>
+                    <select name="country_id" required 
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 @error('country_id') border-red-500 @enderror">
+                        <option value="">Seleccionar país</option>
+                        @foreach($countries as $country)
+                            <option value="{{ $country->id }}" 
+                                {{ old('country_id', $user->city->state->country_id ?? '') == $country->id ? 'selected' : '' }}>
+                                {{ $country->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('country_id')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
                 </div>
-                <div class="col-md-6">
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" class="form-check-input" id="is_admin" name="is_admin" value="1" 
-                            {{ old('is_admin', $user->is_admin) ? 'checked' : '' }}>
-                        <label class="form-check-label" for="is_admin">Usuario Administrador</label>
-                    </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Estado *</label>
+                    <select name="state_id" required 
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 @error('state_id') border-red-500 @enderror">
+                        <option value="">Seleccionar estado</option>
+                        @foreach($states as $state)
+                            <option value="{{ $state->id }}" 
+                                {{ old('state_id', $user->city->state_id ?? '') == $state->id ? 'selected' : '' }}>
+                                {{ $state->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('state_id')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Ciudad *</label>
+                    <select name="city_id" required 
+                            class="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 @error('city_id') border-red-500 @enderror">
+                        <option value="">Seleccionar ciudad</option>
+                        @foreach($cities as $city)
+                            <option value="{{ $city->id }}" 
+                                {{ old('city_id', $user->city_id) == $city->id ? 'selected' : '' }}>
+                                {{ $city->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('city_id')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
-            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                <button type="submit" class="btn btn-primary">Actualizar Usuario</button>
-                <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Cancelar</a>
+            <div class="flex justify-end space-x-4 mt-6">
+                <a href="{{ route('admin.users.index') }}" class="bg-gray-600 text-white px-4 py-2 rounded">Cancelar</a>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Actualizar Usuario</button>
             </div>
         </form>
     </div>
@@ -165,12 +170,9 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const countrySelect = document.getElementById('country_id');
-    const stateSelect = document.getElementById('state_id');
-    const citySelect = document.getElementById('city_id');
-
-    // Usar URLs de Laravel
-    const baseUrl = "{{ url('/') }}";
+    const countrySelect = document.querySelector('select[name="country_id"]');
+    const stateSelect = document.querySelector('select[name="state_id"]');
+    const citySelect = document.querySelector('select[name="city_id"]');
 
     // Cargar estados cuando cambia el país
     countrySelect.addEventListener('change', function() {
@@ -179,32 +181,13 @@ document.addEventListener('DOMContentLoaded', function() {
         citySelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
         
         if (countryId) {
-            fetch(`${baseUrl}/admin/users/ajax/states?country_id=${countryId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la petición');
-                    }
-                    return response.json();
-                })
+            fetch(`/admin/users/ajax/states?country_id=${countryId}`)
+                .then(response => response.json())
                 .then(states => {
-                    if (states.length > 0) {
-                        states.forEach(state => {
-                            const option = new Option(state.name, state.id);
-                            stateSelect.add(option);
-                        });
-                        
-                        // Si hay un estado seleccionado previamente, seleccionarlo
-                        const selectedStateId = "{{ old('state_id', $user->state_id) }}";
-                        if (selectedStateId && countryId == "{{ old('country_id', $user->country_id) }}") {
-                            stateSelect.value = selectedStateId;
-                            // Disparar change event para cargar ciudades
-                            stateSelect.dispatchEvent(new Event('change'));
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading states:', error);
-                    stateSelect.innerHTML = '<option value="">Error cargando estados</option>';
+                    states.forEach(state => {
+                        const option = new Option(state.name, state.id);
+                        stateSelect.add(option);
+                    });
                 });
         }
     });
@@ -215,39 +198,16 @@ document.addEventListener('DOMContentLoaded', function() {
         citySelect.innerHTML = '<option value="">Seleccione una ciudad</option>';
         
         if (stateId) {
-            fetch(`${baseUrl}/admin/users/ajax/cities/${stateId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Error en la petición');
-                    }
-                    return response.json();
-                })
+            fetch(`/admin/users/ajax/cities/${stateId}`)
+                .then(response => response.json())
                 .then(cities => {
-                    if (cities.length > 0) {
-                        cities.forEach(city => {
-                            const option = new Option(city.name, city.id);
-                            citySelect.add(option);
-                        });
-                        
-                        // Si hay una ciudad seleccionada previamente, seleccionarla
-                        const selectedCityId = "{{ old('city_id', $user->city_id) }}";
-                        if (selectedCityId && stateId == "{{ old('state_id', $user->state_id) }}") {
-                            citySelect.value = selectedCityId;
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading cities:', error);
-                    citySelect.innerHTML = '<option value="">Error cargando ciudades</option>';
+                    cities.forEach(city => {
+                        const option = new Option(city.name, city.id);
+                        citySelect.add(option);
+                    });
                 });
         }
     });
-
-    // Si hay un país seleccionado, cargar sus estados al iniciar
-    const selectedCountryId = countrySelect.value;
-    if (selectedCountryId) {
-        countrySelect.dispatchEvent(new Event('change'));
-    }
 });
 </script>
 @endpush
