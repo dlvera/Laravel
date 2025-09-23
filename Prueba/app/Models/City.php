@@ -7,9 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class City extends Model
 {
-    use HasFactory;
-
-    protected $fillable = ['name', 'state_id'];
+    protected $fillable = ['name', 'code', 'state_id'];
 
     public function state()
     {
@@ -19,5 +17,10 @@ class City extends Model
     public function users()
     {
         return $this->hasMany(User::class);
+    }
+
+    public function country()
+    {
+        return $this->state->country;
     }
 }

@@ -1,72 +1,75 @@
+<!-- resources/views/layouts/app.blade.php -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'MAILER S.A.')</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>MAILER S.A.</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ route('dashboard') }}">MAILER S.A.</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    @auth
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('emails.index') }}">Mis Emails</a>
-                        </li>
-                        @if(Auth::check() && Auth::user()->is_admin)
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.users.index') }}">Gestión de Usuarios</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.dashboard') }}">Panel Admin</a>
-                            </li>
-                        @endif
-                    @endauth
-                </ul>
-                <ul class="navbar-nav">
-                    @auth
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                {{ Auth::user()->name }} 
-                                @if(Auth::user()->is_admin)
-                                    <span class="badge bg-warning">Admin</span>
-                                @endif
+<body class="bg-gray-100">
+    <!-- Navigation -->
+    @auth
+    <nav class="bg-blue-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center space-x-8">
+                    <a href="{{ url('/') }}" class="text-xl font-bold">MAILER S.A.</a>
+                    
+                    <div class="flex items-center space-x-4">
+                        <span class="text-sm bg-blue-500 px-2 py-1 rounded">Hola, {{ auth()->user()->name }}</span>
+                        
+                        @if(auth()->user()->isAdmin())
+                            <a href="{{ route('admin.dashboard') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
+                                Dashboard Admin
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('profile') }}">Mi Perfil</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="dropdown-item">Cerrar Sesión</button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    @else
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('login') }}">Iniciar Sesión</a>
-                        </li>
-                    @endauth
-                </ul>
+                            <a href="{{ route('admin.users.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
+                                Gestionar Usuarios
+                            </a>
+                        @endif
+                        
+                        <a href="{{ route('emails.index') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
+                            Emails
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url('/') }}" class="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
+                        Inicio
+                    </a>
+                    <form method="POST" action="{{ route('logout') }}" class="inline">
+                        @csrf
+                        <button type="submit" class="hover:bg-blue-700 px-3 py-2 rounded transition duration-200">
+                            Cerrar Sesión
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </nav>
+    @endauth
 
-    <div class="container mt-4">
-        @yield('content')
-    </div>
+    <!-- Main Content -->
+    <main class="{{ auth()->check() ? 'py-8' : '' }}">
+        <div class="{{ auth()->check() ? 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8' : '' }}">
+            <!-- Mensajes de sesión -->
+            @if(session('success'))
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+                    {{ session('success') }}
+                </div>
+            @endif
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    @yield('scripts')
+            @if(session('error'))
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+                    {{ session('error') }}
+                </div>
+            @endif
+
+            <!-- Content -->
+            @yield('content')
+        </div>
+    </main>
 </body>
 </html>

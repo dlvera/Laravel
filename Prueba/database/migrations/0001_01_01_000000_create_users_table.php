@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('password');
             $table->boolean('is_active')->default(true);
             $table->rememberToken();
+            $table->enum('role', ['admin', 'user'])->default('user');
             // $table->foreignId('city_id')->constrained()->onDelete('cascade');
             $table->timestamps();
               });

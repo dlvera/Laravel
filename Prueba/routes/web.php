@@ -1,52 +1,49 @@
 <?php
-
-use App\Http\Controllers\Auth\LoginController;
+// routes/web.php
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\Admin\UserController;
-use Illuminate\Support\Facades\Route;
 
-// Rutas públicas
-Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/', [LoginController::class, 'login']);
+// Ruta principal - siempre pública
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Rutas protegidas
-Route::middleware('auth')->group(function () {
-    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+// Rutas de autenticación de Laravel
+Auth::routes(['register' => false]);
+
+// Rutas protegidas por autenticación
+Route::middleware(['auth'])->group(function () {
     
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Dashboard principal - redirige según el rol
+    Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+    
+    // Módulo de emails - accesible para todos los usuarios autenticados
+    Route::get('/emails', [EmailController::class, 'index'])->name('emails.index');
+    Route::get('/emails/create', [EmailController::class, 'create'])->name('emails.create');
+    Route::post('/emails', [EmailController::class, 'store'])->name('emails.store');
+    Route::get('/emails/{email}', [EmailController::class, 'show'])->name('emails.show');
+    
+    // Rutas de administración - solo para admins
+    Route::prefix('admin')->middleware('admin')->group(function () {
+        // Dashboard de admin
+        Route::get('/dashboard', [HomeController::class, 'adminDashboard'])->name('admin.dashboard');
+        
+        // Gestión de usuarios
+        Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
+        Route::get('/users/create', [UserController::class, 'create'])->name('admin.users.create');
+        Route::post('/users', [UserController::class, 'store'])->name('admin.users.store');
+        Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+        Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
 
-    Route::get('/profile', function () {
-        return view('profile');
-    })->name('profile');
-
-    // Emails
-    Route::prefix('emails')->name('emails.')->group(function () {
-        Route::get('/', [EmailController::class, 'index'])->name('index');
-        Route::get('/create', [EmailController::class, 'create'])->name('create');
-        Route::post('/', [EmailController::class, 'store'])->name('store');
-        Route::get('/{email}', [EmailController::class, 'show'])->name('show');
-        Route::delete('/{email}', [EmailController::class, 'destroy'])->name('destroy');
-        Route::get('/{email}/download/{attachment}', [EmailController::class, 'downloadAttachment'])
-            ->name('attachment.download');
+        Route::get('/users/ajax/states', [UserController::class, 'getStates'])->name('admin.users.states');
+        Route::get('/users/ajax/cities/{state}', [UserController::class, 'getCities'])->name('admin.users.cities');
     });
 });
 
-// Rutas de administración
-Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard', [
-            'totalUsers' => \App\Models\User::count(),
-            'activeUsers' => \App\Models\User::where('is_active', true)->count(),
-            'adminUsers' => \App\Models\User::where('is_admin', true)->count()
-        ]);
-    })->name('dashboard');
-    
-    // Gestión de usuarios
-    Route::resource('users', UserController::class);
-    
-    // Rutas AJAX - CORREGIDAS
-    Route::get('users/ajax/states', [UserController::class, 'getStates']);
-    Route::get('users/ajax/cities/{state}', [UserController::class, 'getCities']);
-});
+// Ruta de logout personalizada
+Route::post('/logout', function () {
+    Auth::logout();
+    return redirect('/');
+})->name('logout');

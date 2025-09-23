@@ -1,119 +1,86 @@
+<!-- resources/views/admin/dashboard.blade.php -->
 @extends('layouts.app')
 
+@section('title', 'Dashboard - Administrador')
+
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h2>Dashboard - {{ Auth::user()->is_admin ? 'Administrador' : 'Usuario' }}</h2>
+<div class="py-6">
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Dashboard de Administrador</h1>
+    
+    <!-- Estadísticas -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
                 </div>
-
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
-
-                    <div class="row">
-                        <!-- Tarjeta de Perfil -->
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title">Mi Perfil</h5>
-                                    <p class="card-text">Ver y gestionar mi información personal</p>
-                                    <a href="{{ route('profile') }}" class="btn btn-primary">
-                                        <i class="fas fa-user"></i> Ver Perfil
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Tarjeta de Emails -->
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title">Emails</h5>
-                                    <p class="card-text">Gestionar emails enviados y borradores</p>
-                                    <a href="{{ route('emails.index') }}" class="btn btn-success">
-                                        <i class="fas fa-envelope"></i> Gestionar Emails
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Tarjeta Específica según tipo de usuario -->
-                        @if(Auth::user()->is_admin)
-                        <!-- Panel de Administración para admins -->
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title">Administración</h5>
-                                    <p class="card-text">Gestionar usuarios del sistema</p>
-                                    <a href="{{ route('admin.users.index') }}" class="btn btn-warning">
-                                        <i class="fas fa-cog"></i> Panel Admin
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        @else
-                        <!-- Cerrar Sesión para usuarios normales -->
-                        <div class="col-md-4">
-                            <div class="card text-center">
-                                <div class="card-body">
-                                    <h5 class="card-title">Cerrar Sesión</h5>
-                                    <p class="card-text">Salir de manera segura del sistema</p>
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button type="submit" class="btn btn-danger">
-                                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-
-                    <!-- Resumen de actividad específico por tipo de usuario -->
-                    <div class="mt-4">
-                        <h4>Resumen de Actividad</h4>
-                        <div class="row">
-                            @if(Auth::user()->is_admin)
-                            <!-- Resumen para administradores -->
-                            <div class="col-md-6">
-                                <div class="alert alert-info">
-                                    <strong>Total de Usuarios:</strong> 
-                                    {{ App\Models\User::count() }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="alert alert-warning">
-                                    <strong>Usuarios Activos:</strong> 
-                                    {{ App\Models\User::where('is_active', true)->count() }}
-                                </div>
-                            </div>
-                            @else
-                            <!-- Resumen para usuarios normales -->
-                            <div class="col-md-6">
-                                <div class="alert alert-info">
-                                    <strong>Emails Enviados:</strong> 
-                                    {{ Auth::user()->sentEmails()->where('status', 'sent')->count() }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="alert alert-warning">
-                                    <strong>Borradores:</strong> 
-                                    {{ Auth::user()->sentEmails()->where('status', 'draft')->count() }}
-                                </div>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Total Usuarios</h3>
+                    <p class="text-3xl font-bold text-gray-900">{{ $usersCount }}</p>
                 </div>
             </div>
         </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Total Emails</h3>
+                    <p class="text-3xl font-bold text-gray-900">{{ $emailsCount }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600 mr-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-900">Emails Pendientes</h3>
+                    <p class="text-3xl font-bold text-gray-900">{{ $pendingEmails }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a href="{{ route('admin.users.index') }}" class="block p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900">Gestionar Usuarios</h3>
+                    <p class="text-gray-600">Administrar todos los usuarios del sistema</p>
+                </div>
+            </div>
+        </a>
+
+        <a href="{{ route('emails.index') }}" class="block p-6 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-900">Ver Emails</h3>
+                    <p class="text-gray-600">Revisar emails enviados y pendientes</p>
+                </div>
+            </div>
+        </a>
     </div>
 </div>
 @endsection

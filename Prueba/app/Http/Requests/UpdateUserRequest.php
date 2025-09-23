@@ -3,15 +3,16 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateUserRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize(): bool
+    public function authorize()
     {
-        return true;
+        return auth()->check() && auth()->user()->isAdmin();
     }
 
     /**
@@ -19,17 +20,18 @@ class UpdateUserRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array|string>
      */
-    public function rules(): array
+    public function rules()
     {
         $userId = $this->route('user')->id;
 
         return [
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
+            'name' => 'required|string|max:100',
+            'phone' => 'nullable|digits:10',
+            'birth_date' => 'required|date|before_or_equal:-18 years',
             'country_id' => 'required|exists:countries,id',
             'state_id' => 'required|exists:states,id',
             'city_id' => 'required|exists:cities,id',
-            'password' => 'nullable|string|min:8|confirmed',
+            // Email y cédula no se pueden modificar
         ];
     }
 

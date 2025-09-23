@@ -1,74 +1,30 @@
 <?php
-
+// app/Http/Controllers/Auth/LoginController.php
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Str;
 
 class LoginController extends Controller
 {
-    public function showLoginForm()
+    use AuthenticatesUsers;
+
+    protected $redirectTo = '/dashboard';
+
+    public function __construct()
     {
-        return view('auth.login');
+        $this->middleware('guest')->except('logout');
+        $this->middleware('auth')->only('logout');
     }
 
-    public function login(Request $request)
+    protected function authenticated(Request $request, $user)
     {
-        // Validación de campos
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
-        ]);
-
-        // Protección contra fuerza bruta
-        $throttleKey = Str::lower($request->input('email')) . '|' . $request->ip();
-        
-        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
-            $seconds = RateLimiter::availableIn($throttleKey);
-            return back()->withErrors([
-                'email' => "Demasiados intentos. Por favor, espere $seconds segundos.",
-            ]);
+        // Redirigir según el rol después del login
+        if ($user->isAdmin()) {
+            return redirect()->route('admin.dashboard');
+        } else {
+            return redirect()->route('emails.index');
         }
-
-        // Intentar autenticación
-        if (Auth::attempt($credentials, $request->filled('remember'))) {
-            RateLimiter::clear($throttleKey);
-            
-            // Verificar si el usuario está activo
-            if (!Auth::user()->is_active) {
-                Auth::logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-                
-                return back()->withErrors([
-                    'email' => 'Su cuenta ha sido desactivada. Contacte al administrador.',
-                ]);
-            }
-
-            // Regenerar sesión por seguridad
-            $request->session()->regenerate();
-
-            return redirect()->intended('/dashboard');
-        }
-
-        // Incrementar intentos fallidos
-        RateLimiter::hit($throttleKey);
-
-        return back()->withErrors([
-            'email' => 'Las credenciales proporcionadas no coinciden con nuestros registros.',
-        ]);
-    }
-
-    public function logout(Request $request)
-    {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return redirect('/');
     }
 }

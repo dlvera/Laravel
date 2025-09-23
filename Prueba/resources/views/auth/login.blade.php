@@ -1,74 +1,59 @@
+<!-- resources/views/auth/login.blade.php -->
 @extends('layouts.app')
 
+@section('title', 'Login - MAILER S.A.')
+
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-center">Iniciar Sesión - MAILER S.A.</h3>
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Iniciar Sesión
+            </h2>
+        </div>
+        
+        <form class="mt-8 space-y-6" method="POST" action="{{ route('login') }}">
+            @csrf
+            
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="email" class="sr-only">Email</label>
+                    <input id="email" name="email" type="email" autocomplete="email" required 
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                           placeholder="Email address" value="{{ old('email') }}">
                 </div>
-
-                <div class="card-body">
-                    <form method="POST" action="{{ route('login') }}">
-                        @csrf
-
-                        <div class="form-group">
-                            <label for="email">Correo Electrónico</label>
-                            <input id="email" type="email" 
-                                   class="form-control @error('email') is-invalid @enderror" 
-                                   name="email" value="{{ old('email') }}" 
-                                   required autocomplete="email" autofocus
-                                   placeholder="Ingrese su correo electrónico">
-                            
-                            @error('email')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <label for="password">Contraseña</label>
-                            <input id="password" type="password" 
-                                   class="form-control @error('password') is-invalid @enderror" 
-                                   name="password" required autocomplete="current-password"
-                                   placeholder="Ingrese su contraseña">
-                            
-                            @error('password')
-                                <span class="invalid-feedback" role="alert">
-                                    <strong>{{ $message }}</strong>
-                                </span>
-                            @enderror
-                        </div>
-
-                        <div class="form-group">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="remember" 
-                                       id="remember" {{ old('remember') ? 'checked' : '' }}>
-
-                                <label class="form-check-label" for="remember">
-                                    Recordar sesión
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group mb-0">
-                            <button type="submit" class="btn btn-primary btn-block">
-                                <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                            </button>
-                        </div>
-
-                        @if (Route::has('password.request'))
-                            <div class="text-center mt-3">
-                                <a href="{{ route('password.request') }}">
-                                    ¿Olvidaste tu contraseña?
-                                </a>
-                            </div>
-                        @endif
-                    </form>
+                <div>
+                    <label for="password" class="sr-only">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required 
+                           class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                           placeholder="Password">
                 </div>
             </div>
+
+            @if ($errors->any())
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    Iniciar Sesión
+                </button>
+            </div>
+        </form>
+        
+        <!-- Credenciales de prueba -->
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <p class="text-sm text-blue-700">
+                <strong>Credenciales de prueba:</strong><br>
+                Admin: admin@mailer.com / Admin123!<br>
+                Usuario: user@example.com / User123!
+            </p>
         </div>
     </div>
 </div>

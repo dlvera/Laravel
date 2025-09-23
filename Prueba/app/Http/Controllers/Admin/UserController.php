@@ -1,122 +1,120 @@
 <?php
-
+// app/Http/Controllers/Admin/UserController.php
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Country;
-use App\Models\State;
 use App\Models\City;
+use App\Models\State;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
-    public function __construct()
+    public function index(Request $request)
     {
-        $this->middleware(['auth', 'admin']);
-    }
+        $query = User::query();
+        
+        // Filtro de búsqueda
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('cedula', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
 
-    public function index()
-    {
-        $users = User::with(['country', 'state', 'city'])->orderBy('created_at', 'desc')->paginate(10);
-        return view('users.index', compact('users')); 
+        $users = $query->orderBy('created_at', 'desc')->paginate(10);
+        
+        return view('admin.users.index', compact('users'));
     }
 
     public function create()
     {
-        $countries = Country::orderBy('name')->get();
-        return view('users.create', compact('countries')); 
+        $countries = Country::all();
+        return view('admin.users.create', compact('countries'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'identifier' => 'required|unique:users|max:20',
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'cedula' => 'required|string|max:20|unique:users',
-            'birth_date' => 'required|date|before:today',
-            'phone' => 'nullable|string|max:15',
-            'country_id' => 'required|exists:countries,id',
-            'state_id' => 'required|exists:states,id',
+            'password' => 'required|min:8|confirmed',
+            'cedula' => 'required|string|max:11',
+            'phone' => 'nullable|digits:10',
+            'birth_date' => 'required|date|before_or_equal:-18 years',
             'city_id' => 'required|exists:cities,id',
-            'is_active' => 'sometimes|boolean',
-            'is_admin' => 'sometimes|boolean',
         ]);
 
-        User::create([
-            'identifier' => $validated['identifier'],
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'cedula' => $validated['cedula'],
-            'birth_date' => $validated['birth_date'],
-            'phone' => $validated['phone'] ?? null,
-            'country_id' => $validated['country_id'],
-            'state_id' => $validated['state_id'],
-            'city_id' => $validated['city_id'],
-            'is_active' => $validated['is_active'] ?? false,
-            'is_admin' => $validated['is_admin'] ?? false,
-        ]);
+        $validated['password'] = bcrypt($validated['password']);
+        $validated['role'] = 'user';
+        $validated['identifier'] = mt_rand(100000, 999999); // Generar identificador único
 
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario creado exitosamente.');
-    }
+        User::create($validated);
 
-    public function show(User $user)
-    {
-        $user->load('country', 'state', 'city');
-        return view('users.show', compact('user')); 
+        return redirect()->route('admin.users.index')->with('success', 'Usuario creado exitosamente.');
     }
 
     public function edit(User $user)
     {
-        $countries = Country::orderBy('name')->get();
-        $states = State::where('country_id', $user->country_id)->get();
-        $cities = City::where('state_id', $user->state_id)->get();
+        $countries = Country::all();
         
-        return view('users.edit', compact('user', 'countries', 'states', 'cities')); 
+        // 🔥 CARGAR ESTADOS Y CIUDADES BASADO EN LA CIUDAD ACTUAL DEL USUARIO
+        $states = [];
+        $cities = [];
+        
+        if ($user->city) {
+            $states = State::where('country_id', $user->city->state->country_id)->get();
+            $cities = City::where('state_id', $user->city->state_id)->get();
+        }
+        
+        return view('admin.users.edit', compact('user', 'countries', 'states', 'cities'));
     }
 
     public function update(Request $request, User $user)
     {
-        // Validación corregida
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:15',
+        // 🔥 VALIDACIÓN COMPLETA CON TODOS LOS CAMPOS
+        $rules = [
+            'name' => 'required|string|max:100',
+            'phone' => 'nullable|digits:10',
+            'birth_date' => 'required|date|before_or_equal:-18 years',
             'country_id' => 'required|exists:countries,id',
             'state_id' => 'required|exists:states,id',
             'city_id' => 'required|exists:cities,id',
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()], 
-            'is_active' => 'sometimes|boolean',
-            'is_admin' => 'sometimes|boolean',
-        ]);
+        ];
 
-        // Preparar datos para actualizar
+        // 🔥 VALIDAR PASSWORD SOLO SI SE PROPORCIONA
+        if ($request->filled('password')) {
+            $rules['password'] = 'min:8|confirmed';
+        }
+
+        $validated = $request->validate($rules);
+
+        // 🔥 PREPARAR DATOS PARA ACTUALIZAR
         $updateData = [
             'name' => $validated['name'],
             'phone' => $validated['phone'],
-            'country_id' => $validated['country_id'],
-            'state_id' => $validated['state_id'],
+            'birth_date' => $validated['birth_date'],
             'city_id' => $validated['city_id'],
-            'is_active' => $validated['is_active'] ?? false,
-            'is_admin' => $validated['is_admin'] ?? false,
         ];
 
-        // Actualizar contraseña solo si se proporciona
-        if (!empty($validated['password'])) {
-            $updateData['password'] = Hash::make($validated['password']);
+        // ACTUALIZAR PASSWORD SOLO SI SE PROPORCIONA
+        if ($request->filled('password')) {
+            $updateData['password'] = bcrypt($validated['password']);
         }
 
+        // DEBUG: Ver qué datos se van a actualizar
+        Log::info('Actualizando usuario:', $updateData);
+        
         $user->update($updateData);
 
-        // CORREGIDO: Redirección a la ruta correcta
-        return redirect()->route('admin.users.index')
-            ->with('success', 'Usuario actualizado exitosamente.');
+        return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado exitosamente.');
     }
+
 
     public function destroy(User $user)
     {
@@ -125,21 +123,19 @@ class UserController extends Controller
         }
 
         $user->delete();
-    
         return redirect()->route('admin.users.index')->with('success', 'Usuario eliminado exitosamente.');
     }
 
-    // Métodos AJAX
     public function getStates(Request $request)
     {
-        $country_id = $request->get('country_id');
-        $states = State::where('country_id', $country_id)->get();
+        $countryId = $request->country_id;
+        $states = \App\Models\State::where('country_id', $countryId)->get();
         return response()->json($states);
     }
 
-    public function getCities($state_id)
+    public function getCities(State $state)
     {
-        $cities = City::where('state_id', $state_id)->get();
+        $cities = $state->cities;
         return response()->json($cities);
     }
 }

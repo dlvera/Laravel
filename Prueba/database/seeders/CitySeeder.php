@@ -7,10 +7,18 @@ use Illuminate\Database\Seeder;
 
 class CitySeeder extends Seeder
 {
-    public function run()
+     public function run()
     {
-        City::create(['name' => 'La Lisa', 'state_id' => 1]);
-        City::create(['name' => 'Bauta', 'state_id' => 2]);
-        // Agregar más ciudades
+        $bogotaId = \App\Models\State::where('name', 'Bogotá D.C.')->first()->id;
+        
+        $cities = [
+            ['name' => 'Bogotá', 'code' => 1, 'state_id' => $bogotaId],
+            ['name' => 'Medellín', 'code' => 2, 'state_id' => $bogotaId],
+            ['name' => 'Cali', 'code' => 3, 'state_id' => $bogotaId],
+        ];
+
+        foreach ($cities as $city) {
+            \App\Models\City::create($city);
+        }
     }
 }

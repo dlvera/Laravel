@@ -9,64 +9,41 @@ class Email extends Model
 {
     use HasFactory;
 
+    // Agregar constantes de estado
+    const STATUS_PENDING = 'pending';
+    const STATUS_SENDING = 'sending';
+    const STATUS_SENT = 'sent';
+    const STATUS_FAILED = 'failed';
+
     protected $fillable = [
-        'user_id',
-        'recipient_email',
         'subject',
+        'recipient',
         'body',
-        'sent_at',
         'status',
+        'user_id',
+        'sent_at'
     ];
 
     protected $casts = [
         'sent_at' => 'datetime',
     ];
 
-    /**
-     * Relación: Un email pertenece a un usuario
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Relación: Un email puede tener múltiples archivos adjuntos
-     */
-    public function attachments()
-    {
-        return $this->hasMany(EmailAttachment::class);
-    }
-
-    /**
-     * Scope para emails enviados
-     */
-    public function scopeSent($query)
-    {
-        return $query->where('status', 'sent');
-    }
-
-    /**
-     * Scope para borradores
-     */
-    public function scopeDraft($query)
-    {
-        return $query->where('status', 'draft');
-    }
-
-    /**
-     * Marcar email como enviado
-     */
+    // Agregar métodos para cambiar estado
     public function markAsSent()
     {
         $this->update([
-            'status' => 'sent',
-            'sent_at' => now(),
+            'status' => self::STATUS_SENT,
+            'sent_at' => now()
         ]);
     }
 
-    protected static function newFactory()
-{
-    return \Database\Factories\EmailFactory::new();
-}
+    public function markAsFailed()
+    {
+        $this->update(['status' => self::STATUS_FAILED]);
+    }
 }

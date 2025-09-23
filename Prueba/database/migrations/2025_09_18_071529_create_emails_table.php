@@ -4,18 +4,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateEmailsTable extends Migration
 {
     public function up()
     {
         Schema::create('emails', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('recipient_email');
             $table->string('subject');
+            $table->string('recipient');
             $table->text('body');
+            $table->enum('status', ['pending', 'sending', 'sent', 'failed'])->default('pending');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->timestamp('sent_at')->nullable();
-            $table->enum('status', ['draft', 'sent', 'failed'])->default('draft');
             $table->timestamps();
         });
     }
@@ -24,4 +24,4 @@ return new class extends Migration
     {
         Schema::dropIfExists('emails');
     }
-};
+}

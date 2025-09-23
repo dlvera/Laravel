@@ -9,9 +9,16 @@ class StateSeeder extends Seeder
 {
     public function run()
     {
-        // Ejemplo para Cuba
-        State::create(['name' => 'La Habana', 'country_id' => 1]);
-        State::create(['name' => 'Artemisa', 'country_id' => 1]);
-        // Agregar más estados
+        $colombiaId = \App\Models\Country::where('code', 'CO')->first()->id;
+        
+        $states = [
+            ['name' => 'Bogotá D.C.', 'country_id' => $colombiaId],
+            ['name' => 'Antioquia', 'country_id' => $colombiaId],
+            ['name' => 'Valle del Cauca', 'country_id' => $colombiaId],
+        ];
+
+        foreach ($states as $state) {
+            \App\Models\State::create($state);
+        }
     }
 }

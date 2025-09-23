@@ -4,17 +4,20 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): Response
     {
-        // Verificar que el usuario esté autenticado y sea administrador
-        if (Auth::check() && Auth::user()->is_admin) {
-            return $next($request);
+        if (!auth()->check()) {
+            return redirect()->route('login');
         }
 
-        abort(403, 'No autorizado.');
+        if (!auth()->user()->isAdmin()) {
+            abort(403, 'Acceso denegado. Se requieren privilegios de administrador.');
+        }
+
+        return $next($request);
     }
 }

@@ -9,7 +9,14 @@ class CountrySeeder extends Seeder
 {
     public function run()
     {
-        Country::create(['name' => 'Cuba']);
-        // Agregar más países si es necesario
+        $countries = [
+            ['name' => 'Colombia', 'code' => 'CO'],
+            ['name' => 'Estados Unidos', 'code' => 'US'],
+            ['name' => 'México', 'code' => 'MX'],
+        ];
+
+        foreach ($countries as $country) {
+            Country::create($country);
+        }
     }
 }
